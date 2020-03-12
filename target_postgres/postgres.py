@@ -220,7 +220,10 @@ class PostgresTarget(SQLInterface):
         for mapped_name, raw_json in cur.fetchall():
             table_path = None
             if raw_json:
-                table_path = json.loads(raw_json).get('path', None)
+                try:
+                    table_path = json.loads(raw_json).get('path', None)
+                except json.decoder.JSONDecodeError:
+                    self.LOGGER.info("Unable to decode description as json for {} to {}".format(mapped_name, table_path))        
             self.LOGGER.info("Mapping: {} to {}".format(mapped_name, table_path))
             if table_path:
                 self.table_mapping_cache[tuple(table_path)] = mapped_name
